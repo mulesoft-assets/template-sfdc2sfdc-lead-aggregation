@@ -1,7 +1,6 @@
 package org.mule.templates.integration;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -157,27 +156,6 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 				.with("Description", "Some fake description")
 				.with("Phone", "123456789")
 				.build();
-	}
-
-	private String buildUniqueName(String templateName, String name) {
-		String timeStamp = new Long(new Date().getTime()).toString();
-
-		StringBuilder builder = new StringBuilder();
-		builder.append(name);
-		builder.append(templateName);
-		builder.append(timeStamp);
-
-		return builder.toString();
-	}
-
-	private String buildUniqueEmail(String lead) {
-		String server = "fakemail";
-		StringBuilder builder = new StringBuilder();
-		builder.append(TEMPLATE_NAME + lead);
-		builder.append("@");
-		builder.append(server);
-		builder.append(".com");
-		return builder.toString();
 	}
 
 }
