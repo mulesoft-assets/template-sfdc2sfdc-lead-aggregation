@@ -1,6 +1,7 @@
 package org.mule.templates.integration;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +23,7 @@ import com.sforce.soap.partner.SaveResult;
 /**
  * The objective of this class is to validate the correct behavior of the flows for this Mule Template that make calls to external systems.
  */
-public class BusinessLogicIT extends AbstractTemplateTestCase {
+public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 
 	protected static final String TEMPLATE_NAME = "lead-aggregation";
 	private static final String LEADS_FROM_ORG_A = "leadsFromOrgA";
@@ -156,6 +157,29 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 				.with("Description", "Some fake description")
 				.with("Phone", "123456789")
 				.build();
+	}
+	
+	private String buildUniqueName(String templateName, String name) {
+		String timeStamp = new Long(new Date().getTime()).toString();
+
+		StringBuilder builder = new StringBuilder();
+		builder.append(name);
+		builder.append(templateName);
+		builder.append(timeStamp);
+
+		return builder.toString();
+	}
+	
+	private String buildUniqueEmail(String user) {
+		String server = "fakemail";
+
+		StringBuilder builder = new StringBuilder();
+		builder.append(buildUniqueName(TEMPLATE_NAME, user));
+		builder.append("@");
+		builder.append(server);
+		builder.append(".com");
+
+		return builder.toString();
 	}
 
 }

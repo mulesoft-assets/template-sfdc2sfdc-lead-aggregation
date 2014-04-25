@@ -8,7 +8,6 @@ http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
 http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd">
-    <data-mapper:config name="map_to_csv" transformationGraphPath="map_to_csv.grf" doc:name="map_to_csv"/>
     <flow name="triggerFlow" doc:name="triggerFlow" processingStrategy="synchronous">
         <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="${http.port}" path="generateReport" doc:name="HTTP"/>
         <flow-ref name="mainFlow" doc:name="MainFlow"/>
