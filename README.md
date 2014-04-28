@@ -31,10 +31,8 @@ Simple steps to get SFDC to SFDC Lead Aggregation running
 In any of the ways you would like to run this Anypoint Template, here is an example of the output you'll see after hitting the HTTP endpoint:
 
 <pre>
-<h1>Batch Process initiated</h1>
-<b>ID:</b>6eea3cc6-7c96-11e3-9a65-55f9f3ae584e<br/>
-<b>Records to Be Processed: </b>9<br/>
-<b>Start execution on: </b>Mon Jan 13 18:05:33 GMT-03:00 2014
+<h1>Aggregation task completed successfully</h1>
+<b>Executed on: </b>Mon Jan 13 18:05:33 GMT-03:00 2014
 </pre>
 
 ## Running on premise <a name="runonopremise"/>
@@ -104,11 +102,11 @@ In order to use this Mule Template you need to configure properties (Credentials
 
 # API Calls <a name="apicalls"/>
 
-SalesForce imposes limits on the number of API Calls that can be made. Therefore calculating this amount may be an important factor to consider. User Broadcast Template calls to the API can be calculated using the formula:
+SalesForce imposes limits on the number of API Calls that can be made. Therefore calculating this amount may be an important factor to consider. Lead Aggregation Template calls to the API can be calculated using the formula:
 
-***2***
+***1***
 
-The reason for the "formula" to be a constant number is that this Anypoint Template only require two API call to recover the require data.
+The reason for the "formula" to be a constant number is that this Anypoint Template only require one API call to recover the require data.
 
 # Customize It!<a name="customizeit"/>
 
@@ -140,11 +138,6 @@ This Template has an [HTTP Inbound Endpoint](http://www.mulesoft.org/documentati
 + The path configured by default is `generatereport` and you are free to change for the one you prefer.
 + The host name for all endpoints in your CloudHub configuration should be defined as `localhost`. CloudHub will then route requests from your application domain URL to the endpoint.
 
-###  Outbound Flow
-**SMTP Outbound Endpoint** - Send Mail
-+ Both SMTP Server configuration and the actual mail to be sent are defined in this endpoint.
-+ This flow is going to be invoked from the flow that does all the functional work: *mainFlow*, the same that is invoked from the Inbound Flow upon triggering of the HTTP Endpoint.
-
 
 ## businessLogic.xml<a name="businesslogicxml"/>
 Functional aspect of the Template is implemented on this XML, directed by one flow responsible of conducting the aggregation of data, comparing records and finally formating the output, in this case being a report.
@@ -153,7 +146,7 @@ This flow has Exception Strategy that basically consists on invoking the *defaul
 
 
 ###  Gather Data Flow
-Mainly consisting of two calls (Queries) to SalesForce and storing each response on the Invocation Variable named *leadsFromOrgA* or *leadsFromOrgA* accordingly.
+Mainly consisting of two calls (Queries) to SalesForce and storing each response on the Invocation Variable named *leadsFromOrgA* or *leadsFromOrgB* accordingly.
 
 ###  Aggregation Flow
 [Java Transformer](http://www.mulesoft.org/documentation/display/current/Java+Transformer+Reference) responsible for aggregating the results from the two SalesForce Org Leads.
@@ -174,6 +167,11 @@ If you want to change this order then the *compare* method should be modified.
 + CSV Report [DataMapper](http://www.mulesoft.org/documentation/display/current/Datamapper+User+Guide+and+Reference) transforming the List of Maps in CSV with headers **Name**, **Email**, **IDInA**, and **IDInB**.
 + An [Object to string transformer](http://www.mulesoft.org/documentation/display/current/Transformers) is used to set the payload as an String. 
 
+###  Outbound Flow
+**SMTP Outbound Endpoint** - Send Mail
++ Both SMTP Server configuration and the actual mail to be sent are defined in this endpoint.
++ This flow is going to be invoked from the flow that does all the functional work: *mainFlow*, the same that is invoked from the Inbound Flow upon triggering of the HTTP Endpoint.
+
 
 ## errorHandling.xml<a name="errorhandlingxml"/>
 Contains a [Catch Exception Strategy](http://www.mulesoft.org/documentation/display/current/Catch+Exception+Strategy) that is only Logging the exception thrown (If so). As you imagine, this is the right place to handle how your integration will react depending on the different exceptions. 
@@ -190,6 +188,6 @@ You can run any of them by just doing right click on the class and clicking on r
 
 Do bear in mind that you'll have to tell the test classes which property file to use.
 For you convinience we have added a file mule.test.properties located in "src/test/resources".
-In the run configurations of the test just make sure to add the following property:
+In the run configurations of the test just make sure to add the following jvm property:
 
 + -Dmule.env=test

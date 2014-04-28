@@ -10,31 +10,32 @@ http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schem
 http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd">
 	<data-mapper:config name="map_to_csv" transformationGraphPath="map_to_csv.grf" doc:name="map_to_csv"/>
     <flow name="mainFlow" doc:name="mainFlow">
-        <flow-ref name="gatherDataFlow" doc:name="gatherDataFlow" doc:description="Gathering information"/>
-        <flow-ref name="aggregationFlow" doc:name="aggregationFlow"/>
-        <flow-ref name="formatOutputFlow" doc:name="formatOutputFlow"/>
-        <flow-ref name="outboundFlow" doc:name="outboundFlow"/>
+        <flow-ref name="gatherDataFlow" doc:name="Call gatherDataFlow" doc:description="Gathering information"/>
+        <flow-ref name="aggregationFlow" doc:name="Call aggregationFlow"/>
+        <flow-ref name="formatOutputFlow" doc:name="Call formatOutputFlow"/>
+        <flow-ref name="outboundFlow" doc:name="Call outboundFlow"/>
+        <exception-strategy ref="defaultChoiceExceptionStrategy" doc:name="Reference Exception Strategy"/>
     </flow>
     <sub-flow name="gatherDataFlow" doc:name="gatherDataFlow">
         <enricher source="#[payload]" target="#[flowVars['leadsFromOrgA']]" doc:name="Store result from SalesforceA to leadsFromOrgA">
-            <sfdc:query config-ref="SalesforceA" query="dsql:SELECT Email,Id,Name FROM Lead" doc:name="SalesforceA"/>
+            <sfdc:query config-ref="SalesforceA" query="dsql:SELECT Email,Id,Name FROM Lead" doc:name="query all users from SalesForce instance A"/>
         </enricher>
         <enricher source="#[payload]" target="#[flowVars['leadsFromOrgB']]" doc:name="Store result from SalesforceB to leadsFromOrgB">
-            <sfdc:query config-ref="SalesforceB" query="dsql:SELECT Email,Id,Name FROM Lead" doc:name="SalesforceB"/>
+            <sfdc:query config-ref="SalesforceB" query="dsql:SELECT Email,Id,Name FROM Lead" doc:name="query all users from SalesForce instance B"/>
         </enricher>
     </sub-flow>
     <sub-flow name="aggregationFlow" doc:name="aggregationFlow">
         <custom-transformer class="org.mule.templates.transformers.SFDCLeadMerge" doc:name="Custom component to build merged contacts list"/>
     </sub-flow>
     <sub-flow name="formatOutputFlow" doc:name="formatOutputFlow">
-        <custom-transformer class="org.mule.templates.transformers.SortLeadList" doc:name="Sort list"/>
-        <data-mapper:transform config-ref="map_to_csv" doc:name="Map To CSV"/>
-        <object-to-string-transformer doc:name="Object to String"/>
+        <custom-transformer class="org.mule.templates.transformers.SortLeadList" doc:name="Custom component to sort users list"/>
+        <data-mapper:transform config-ref="map_to_csv" doc:name="Transform Collection of Maps to CSV Format"/>
+        <object-to-string-transformer doc:name="CSV Output Object to String"/>
     </sub-flow>
     <sub-flow name="outboundFlow" doc:name="outboundFlow">
-        <set-attachment attachmentName="${attachment.name}" value="#[message.payload]" contentType="text/plain" doc:name="Set attachment"/>
-        <set-payload value="Lead aggregation task completed successfully" doc:name="Set mail body"/>
-        <smtp:outbound-endpoint host="${smtp.host}" port="${smtp.port}" user="${smtp.user}" password="${smtp.password}" to="${mail.to}" responseTimeout="10000" doc:name="Send email" from="${mail.from}" subject="${mail.subject}"/>
+        <set-attachment attachmentName="${attachment.name}" value="#[message.payload]" contentType="text/plain" doc:name="Attach report to mail"/>
+        <set-payload value="${mail.body}" doc:name="Set mail body"/>
+        <smtp:outbound-endpoint host="${smtp.host}" port="${smtp.port}" user="${smtp.user}" password="${smtp.password}" to="${mail.to}" responseTimeout="10000" doc:name="Send mail" from="${mail.from}" subject="${mail.subject}"/>
     </sub-flow>
 
 </mule>
