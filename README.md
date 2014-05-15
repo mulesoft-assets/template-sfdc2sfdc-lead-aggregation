@@ -1,4 +1,3 @@
-
 # Mule Anypoint Template: SFDC to SFDC Lead aggregation
 
 + [Use Case](#usecase)
