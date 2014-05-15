@@ -13,9 +13,7 @@ import org.mule.transformer.AbstractMessageTransformer;
 import com.google.common.collect.Lists;
 
 /**
- * This transformer will take to list as input and create a third one that will
- * be the merge of the previous two. The identity of an element of the list is
- * defined by its email.
+ * This transformer will take to list as input and create a third one that will be the merge of the previous two. The identity of an element of the list is defined by its email.
  */
 public class SFDCLeadMerge extends AbstractMessageTransformer {
 
@@ -57,7 +55,8 @@ public class SFDCLeadMerge extends AbstractMessageTransformer {
 			Map<String, String> leadFromA = findLeadInList(leadsFromB.get("Email"), mergedLeadsList);
 			if (leadFromA != null) {
 				leadFromA.put("IDInB", leadsFromB.get("Id"));
-			} else {
+			}
+			else {
 				Map<String, String> mergedLead = createMergedLead(leadsFromB);
 				mergedLead.put("IDInB", leadsFromB.get("Id"));
 				mergedLeadsList.add(mergedLead);
@@ -77,7 +76,7 @@ public class SFDCLeadMerge extends AbstractMessageTransformer {
 
 	private Map<String, String> findLeadInList(String leadName, List<Map<String, String>> orgList) {
 		for (Map<String, String> lead : orgList) {
-			if (lead.get("Email").equals(leadName)) {
+			if (lead.get("Email") != null && lead.get("Email").equals(leadName)) {
 				return lead;
 			}
 		}
