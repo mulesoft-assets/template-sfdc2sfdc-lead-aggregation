@@ -1,4 +1,4 @@
-# Mule Anypoint Template: SFDC to SFDC Lead aggregation
+# Mule Anypoint Template: Salesforce to Salesforce Lead aggregation
 
 + [Use Case](#usecase)
 + [Run it!](#runit)
