@@ -24,7 +24,8 @@ public class SFDCLeadsMergeTest {
 
 	@Mock
 	private MuleContext muleContext;
-
+  
+	
 	@Test
 	public void testMerge() throws TransformerException {
 		List<Map<String, String>> leadsA = createLeadLists("A", 0, 1);

@@ -10,7 +10,7 @@ public class SfdcObjectBuilder {
 	public SfdcObjectBuilder() {
 		this.fields = new HashMap<String, Object>();
 	}
-
+ 
 	public SfdcObjectBuilder with(String field, Object value) {
 		SfdcObjectBuilder copy = new SfdcObjectBuilder();
 		copy.fields.putAll(this.fields);

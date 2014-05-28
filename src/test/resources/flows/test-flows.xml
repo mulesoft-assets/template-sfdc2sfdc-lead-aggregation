@@ -13,6 +13,7 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
             <sfdc:objects ref="#[payload]"/>
         </sfdc:create>
     </sub-flow>
+    
     <sub-flow name="deleteLeadFromAFlow" doc:name="deleteLeadFromAFlow">
         <sfdc:delete config-ref="SalesforceA" doc:name="Salesforce">
             <sfdc:ids ref="#[payload]"/>

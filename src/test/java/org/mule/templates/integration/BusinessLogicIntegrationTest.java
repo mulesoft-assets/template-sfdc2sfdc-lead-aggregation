@@ -31,6 +31,7 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 	private List<Map<String, Object>> createdLeadsInA = new ArrayList<Map<String, Object>>();
 	private List<Map<String, Object>> createdLeadsInB = new ArrayList<Map<String, Object>>();
 
+	
 	@Rule
 	public DynamicPort port = new DynamicPort("http.port");
 
