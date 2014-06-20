@@ -9,6 +9,7 @@ http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/ba
 http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
 http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd">
 	<data-mapper:config name="map_to_csv" transformationGraphPath="map_to_csv.grf" doc:name="map_to_csv"/>
+	
     <flow name="mainFlow" doc:name="mainFlow">
         <flow-ref name="gatherDataFlow" doc:name="Call gatherDataFlow" doc:description="Gathering information"/>
         <flow-ref name="aggregationFlow" doc:name="Call aggregationFlow"/>
