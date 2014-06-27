@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.mule.api.MuleMessage;
 import org.mule.api.transformer.TransformerException;
 import org.mule.transformer.AbstractMessageTransformer;
@@ -80,9 +81,11 @@ public class SFDCLeadMerge extends AbstractMessageTransformer {
 		return mergedLead;
 	}
 
-	private Map<String, String> findLeadInList(String leadName, List<Map<String, String>> orgList) {
+	private Map<String, String> findLeadInList(String leadEmail, List<Map<String, String>> orgList) {
+		if(StringUtils.isBlank(leadEmail))
+			return null;
 		for (Map<String, String> lead : orgList) {
-			if (lead.get("Email") != null && lead.get("Email").equals(leadName)) {
+			if (StringUtils.isNotBlank(lead.get("Email")) && lead.get("Email").equals(leadEmail)) {
 				return lead;
 			}
 		}

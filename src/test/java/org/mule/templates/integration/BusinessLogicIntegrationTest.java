@@ -71,8 +71,8 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void testAggregationFlow() throws Exception {
-		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1);
-		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2);
+		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1, false);
+		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2, false);
 
 		MuleEvent testEvent = getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE);
 		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_A, leadsFromOrgA.iterator());
@@ -88,8 +88,8 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 
 	@Test
 	public void testFormatOutputFlow() throws Exception {
-		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1);
-		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2);
+		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1, true);
+		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2, true);
 
 		MuleEvent testEvent = getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE);
 		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_A, leadsFromOrgA.iterator());
@@ -106,12 +106,32 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
 	}
 
+	@Test
+	public void testFormatOutputFlowWithEmptyEmail() throws Exception {
+		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1, false);
+		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2, false);
+		
+		MuleEvent testEvent = getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE);
+		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_A, leadsFromOrgA.iterator());
+		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_B, leadsFromOrgB.iterator());
+		
+		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("aggregationFlow");
+		flow.initialise();
+		MuleEvent event = flow.process(testEvent);
+		
+		flow = getSubFlow("formatOutputFlow");
+		flow.initialise();
+		event = flow.process(event);
+		
+		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
+	}
+
 	@SuppressWarnings("unchecked")
 	private void createLeads() throws Exception {
 		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("createLeadInAFlow");
 		flow.initialise();
 
-		Map<String, Object> lead = createLead("A", 0);
+		Map<String, Object> lead = createLead("A", 0, true);
 		createdLeadsInA.add(lead);
 
 		MuleEvent event = flow.process(getTestEvent(createdLeadsInA, MessageExchangePattern.REQUEST_RESPONSE));
@@ -123,7 +143,7 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		flow = getSubFlow("createLeadInBFlow");
 		flow.initialise();
 
-		lead = createLead("B", 0);
+		lead = createLead("B", 0, true);
 		createdLeadsInB.add(lead);
 
 		event = flow.process(getTestEvent(createdLeadsInB, MessageExchangePattern.REQUEST_RESPONSE));
@@ -134,10 +154,10 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		}
 	}
 
-	private List<Map<String, Object>> createLeadLists(String orgId, int start, int end) {
+	private List<Map<String, Object>> createLeadLists(String orgId, int start, int end, boolean createEmail) {
 		List<Map<String, Object>> leadList = new ArrayList<Map<String, Object>>();
 		for (int i = start; i <= end; i++) {
-			leadList.add(createLead(orgId, i));
+			leadList.add(createLead(orgId, i, createEmail));
 		}
 		return leadList;
 	}
@@ -154,16 +174,18 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		idList.clear();
 	}
 
-	private Map<String, Object> createLead(String orgId, int sequence) {
-		return SfdcObjectBuilder.aLead()
+	private Map<String, Object> createLead(String orgId, int sequence, boolean createEmail) {
+		Map<String, Object> lead = SfdcObjectBuilder.aLead()
 				.with("FirstName", "FirstName_" + orgId + sequence)
 				.with("LastName", buildUniqueName(TEMPLATE_NAME, "LastName_" + sequence + "_"))
 				.with("Title", "Dr")
 				.with("Company", "Fake Company llc")
-				.with("Email", buildUniqueEmail("some.email." + sequence))
 				.with("Description", "Some fake description")
 				.with("Phone", "123456789")
 				.build();
+		if(createEmail)
+			lead.put("Email", buildUniqueEmail("some.email." + sequence));
+		return lead;
 	}
 	
 	private String buildUniqueName(String templateName, String name) {
