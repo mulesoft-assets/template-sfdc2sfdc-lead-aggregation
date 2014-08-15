@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.mule.templates</groupId>
@@ -17,8 +18,8 @@
 		<connection>scm:git:https://github.com/mulesoft/template-sfdc2sfdc-lead-aggregation.git</connection>
 		<developerConnection>scm:git:https://github.com/mulesoft/template-sfdc2sfdc-lead-aggregation.git</developerConnection>
 		<url>https://github.com/mulesoft/template-sfdc2sfdc-lead-aggregation</url>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<build>
 		<plugins>
@@ -39,7 +40,7 @@
 	</build>
 
 	<dependencies>
-		
+
 		<dependency>
 			<groupId>org.mule.modules</groupId>
 			<artifactId>mule-module-sfdc</artifactId>

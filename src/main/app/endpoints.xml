@@ -13,6 +13,11 @@ http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smt
         <flow-ref name="mainFlow" doc:name="Call mainFlow"/>
         <set-payload value="&lt;body style='font-family:Courier'&gt;&lt;h1&gt;Aggregation task completed successfully&lt;/h1&gt;&lt;b&gt;Executed on: : &lt;/b&gt;#[new java.util.Date()]&lt;/body&gt;" doc:name="Set html body"/>
         <http:response-builder status="200" contentType="text/html" doc:name="Build http response"/>
-
+    </flow>
+    
+     <flow name="outboundFlow" doc:name="outboundFlow">
+        <set-attachment attachmentName="${attachment.name}" value="#[message.payload]" contentType="text/plain" doc:name="Attach report to mail"/>
+        <set-payload value="${mail.body}" doc:name="Set mail body"/>
+        <smtp:outbound-endpoint host="${smtp.host}" port="${smtp.port}" user="${smtp.user}" password="${smtp.password}" to="${mail.to}" responseTimeout="10000" doc:name="Send mail" from="${mail.from}" subject="${mail.subject}"/>
     </flow>
 </mule>
