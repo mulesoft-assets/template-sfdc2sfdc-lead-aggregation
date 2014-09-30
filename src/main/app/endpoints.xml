@@ -11,8 +11,7 @@ http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smt
     <flow name="triggerFlow" doc:name="triggerFlow" processingStrategy="synchronous">
         <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="${http.port}" path="generatereport" doc:name="Start Synchronization"/>
         <flow-ref name="mainFlow" doc:name="Call mainFlow"/>
-        <set-payload value="&lt;body style='font-family:Courier'&gt;&lt;h1&gt;Aggregation task completed successfully&lt;/h1&gt;&lt;b&gt;Executed on: : &lt;/b&gt;#[new java.util.Date()]&lt;/body&gt;" doc:name="Set html body"/>
-        <http:response-builder status="200" contentType="text/html" doc:name="Build http response"/>
+
     </flow>
     
      <flow name="outboundFlow" doc:name="outboundFlow">
