@@ -30,7 +30,6 @@ public class SortContactsListTest {
 
 	@Test
 	public void testSort() throws TransformerException {
-
 		
 		MuleMessage message = new DefaultMuleMessage(createOriginalList(),
 				muleContext);

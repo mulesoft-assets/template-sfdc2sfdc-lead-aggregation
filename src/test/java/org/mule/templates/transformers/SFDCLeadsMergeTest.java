@@ -8,8 +8,10 @@ package org.mule.templates.transformers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import junit.framework.Assert;
 
@@ -25,9 +27,7 @@ import org.mule.api.transformer.TransformerException;
 @SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
 public class SFDCLeadsMergeTest {
-	private static final String QUERY_COMPANY_A = "leadsFromOrgA";
-	private static final String QUERY_COMPANY_B = "leadsFromOrgB";
-
+	
 	@Mock
 	private MuleContext muleContext;
   
@@ -38,9 +38,11 @@ public class SFDCLeadsMergeTest {
 		List<Map<String, String>> leadsB = createLeadLists("B", 1, 2);
 
 		MuleMessage message = new DefaultMuleMessage(null, muleContext);
-		message.setInvocationProperty(QUERY_COMPANY_A, leadsA.iterator());
-		message.setInvocationProperty(QUERY_COMPANY_B, leadsB.iterator());
-
+		CopyOnWriteArrayList<Iterator<Map<String, String>>> list = new CopyOnWriteArrayList<Iterator<Map<String,String>>>(); 
+		list.add(leadsA.iterator());
+		list.add(leadsB.iterator());
+		message.setPayload(list);
+		
 		SFDCLeadMerge transformer = new SFDCLeadMerge();
 		List<Map<String, String>> mergedList = (List<Map<String, String>>) transformer.transform(message, "UTF-8");
 

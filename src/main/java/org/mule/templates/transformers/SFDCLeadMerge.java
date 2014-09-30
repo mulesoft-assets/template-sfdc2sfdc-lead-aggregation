@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.lang.StringUtils;
 import org.mule.api.MuleMessage;
@@ -29,12 +30,13 @@ public class SFDCLeadMerge extends AbstractMessageTransformer {
 
 	@Override
 	public Object transformMessage(MuleMessage message, String outputEncoding) throws TransformerException {
-		List<Map<String, String>> mergedLeadList = mergeList(getLeadsList(message, QUERY_COMPANY_A), getLeadsList(message, QUERY_COMPANY_B));
+		List<Map<String, String>> mergedLeadList = mergeList(getLeadsList(message, 0), getLeadsList(message, 1));
 		return mergedLeadList;
 	}
 
-	private List<Map<String, String>> getLeadsList(MuleMessage message, String propertyName) {
-		Iterator<Map<String, String>> iterator = message.getInvocationProperty(propertyName);
+	private List<Map<String, String>> getLeadsList(MuleMessage message, int index) {
+//		Iterator<Map<String, String>> iterator = message.getInvocationProperty(propertyName);
+		Iterator<Map<String, String>> iterator = (Iterator<Map<String, String>>) ((CopyOnWriteArrayList) message.getPayload()).get(index);
 		return Lists.newArrayList(iterator);
 	}
 

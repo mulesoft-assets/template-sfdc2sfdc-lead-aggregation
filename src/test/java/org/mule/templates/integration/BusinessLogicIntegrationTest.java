@@ -8,9 +8,10 @@ package org.mule.templates.integration;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -32,11 +33,8 @@ import com.sforce.soap.partner.SaveResult;
 public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 
 	protected static final String TEMPLATE_NAME = "lead-aggregation";
-	private static final String LEADS_FROM_ORG_A = "leadsFromOrgA";
-	private static final String LEADS_FROM_ORG_B = "leadsFromOrgB";
 	private List<Map<String, Object>> createdLeadsInA = new ArrayList<Map<String, Object>>();
 	private List<Map<String, Object>> createdLeadsInB = new ArrayList<Map<String, Object>>();
-
 	
 	@Rule
 	public DynamicPort port = new DynamicPort("http.port");
@@ -55,15 +53,16 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 	@Test
 	public void testGatherDataFlow() throws Exception {
 		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("gatherDataFlow");
+		flow.setMuleContext(muleContext);
 		flow.initialise();
-
+		flow.start();
 		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
-		Set<String> flowVariables = event.getFlowVariableNames();
-		Assert.assertTrue("The variable leadsFromOrgA is missing.", flowVariables.contains(LEADS_FROM_ORG_A));
-		Assert.assertTrue("The variable leadsFromOrgB is missing.", flowVariables.contains(LEADS_FROM_ORG_B));
+		CopyOnWriteArrayList<ConsumerIterator<Map<String, Object>>> list = ((CopyOnWriteArrayList<ConsumerIterator<Map<String, Object>>>)event.getMessage().getPayload());
+		Assert.assertTrue("The variable leadsFromOrgA or leadsFromOrgB is missing.", list.size() == 2);
 
-		ConsumerIterator<Map<String, String>> leadsFromOrgA = event.getFlowVariable(LEADS_FROM_ORG_A);
-		ConsumerIterator<Map<String, String>> leadsFromOrgB = event.getFlowVariable(LEADS_FROM_ORG_B);
+		ConsumerIterator<Map<String, Object>> leadsFromOrgA = list.get(0);
+		ConsumerIterator<Map<String, Object>> leadsFromOrgB = list.get(1);
+		
 		Assert.assertTrue("There should be leads in the variable leadsFromOrgA.", leadsFromOrgA.size() != 0);
 		Assert.assertTrue("There should be leads in the variable leadsFromOrgB.", leadsFromOrgB.size() != 0);
 	}
@@ -71,12 +70,7 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void testAggregationFlow() throws Exception {
-		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1, false);
-		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2, false);
-
-		MuleEvent testEvent = getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE);
-		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_A, leadsFromOrgA.iterator());
-		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_B, leadsFromOrgB.iterator());
+		MuleEvent testEvent = prepareTestEvent();
 
 		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("aggregationFlow");
 		flow.initialise();
@@ -87,14 +81,8 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 	}
 
 	@Test
-	public void testFormatOutputFlow() throws Exception {
-		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1, true);
-		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2, true);
-
-		MuleEvent testEvent = getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE);
-		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_A, leadsFromOrgA.iterator());
-		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_B, leadsFromOrgB.iterator());
-
+	public void testFormatOutputFlow() throws Exception {		
+		MuleEvent testEvent = prepareTestEvent();
 		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("aggregationFlow");
 		flow.initialise();
 		MuleEvent event = flow.process(testEvent);
@@ -108,12 +96,7 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 
 	@Test
 	public void testFormatOutputFlowWithEmptyEmail() throws Exception {
-		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1, false);
-		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2, false);
-		
-		MuleEvent testEvent = getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE);
-		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_A, leadsFromOrgA.iterator());
-		testEvent.getMessage().setInvocationProperty(LEADS_FROM_ORG_B, leadsFromOrgB.iterator());
+		MuleEvent testEvent = prepareTestEvent();
 		
 		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("aggregationFlow");
 		flow.initialise();
@@ -124,6 +107,19 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		event = flow.process(event);
 		
 		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
+	}
+
+	private MuleEvent prepareTestEvent() throws Exception {
+		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1, false);
+		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2, false);
+		
+		MuleEvent testEvent = getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE);
+		CopyOnWriteArrayList<Iterator<Map<String, Object>>> list = new CopyOnWriteArrayList<Iterator<Map<String,Object>>>(); 
+		list.add(leadsFromOrgA.iterator());
+		list.add(leadsFromOrgB.iterator());
+		testEvent.getMessage().setPayload(list);
+
+		return testEvent;
 	}
 
 	@SuppressWarnings("unchecked")
