@@ -18,16 +18,6 @@ As implemented, it gets leads from two instances of Salesforce, compares by the 
 To make this Anypoint Template run, there are certain preconditions that must be considered. All of them deal with the preparations in both, that must be made in order for all to run smoothly. **Failling to do so could lead to unexpected behavior of the template.**
 ]]>
 		</section>
-		<section id="run_it">
-<![CDATA[
-In any of the ways you would like to run this Anypoint Template, here is an example of the output you'll see after hitting the HTTP endpoint:
-
-<pre>
-<h1>Aggregation task completed successfully</h1>
-<b>Executed on: </b>Mon Jan 13 18:05:33 GMT-03:00 2014
-</pre>
-]]>
-		</section>
 		<section id="running_on_cloudhub">
 <![CDATA[
 Once your app is all set and started, supposing you choose as domain name `sfdcleadaggregation` to trigger the use case you just need to hit `http://sfdcleadaggregation.cloudhub.io/generatereport` and the report will be sent to the emails configured.
