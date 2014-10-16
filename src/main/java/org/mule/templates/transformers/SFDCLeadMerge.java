@@ -8,37 +8,15 @@ package org.mule.templates.transformers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.lang.StringUtils;
-import org.mule.api.MuleMessage;
-import org.mule.api.transformer.TransformerException;
-import org.mule.transformer.AbstractMessageTransformer;
-
-import com.google.common.collect.Lists;
 
 /**
  * This transformer will take to list as input and create a third one that will be the merge of the previous two. The identity of an element of the list is defined by its email.
  */
-public class SFDCLeadMerge extends AbstractMessageTransformer {
-
-	private static final String QUERY_COMPANY_A = "leadsFromOrgA";
-	private static final String QUERY_COMPANY_B = "leadsFromOrgB";
-
-	@Override
-	public Object transformMessage(MuleMessage message, String outputEncoding) throws TransformerException {
-		List<Map<String, String>> mergedLeadList = mergeList(getLeadsList(message, 0), getLeadsList(message, 1));
-		return mergedLeadList;
-	}
-
-	private List<Map<String, String>> getLeadsList(MuleMessage message, int index) {
-//		Iterator<Map<String, String>> iterator = message.getInvocationProperty(propertyName);
-		Iterator<Map<String, String>> iterator = (Iterator<Map<String, String>>) ((CopyOnWriteArrayList) message.getPayload()).get(index);
-		return Lists.newArrayList(iterator);
-	}
+public class SFDCLeadMerge {
 
 	/**
 	 * The method will merge the leads from the two lists creating a new one.
@@ -49,7 +27,7 @@ public class SFDCLeadMerge extends AbstractMessageTransformer {
 	 *            leads from organization B
 	 * @return a list with the merged content of the to input lists
 	 */
-	private List<Map<String, String>> mergeList(List<Map<String, String>> leadsFromOrgA, List<Map<String, String>> leadsFromOrgB) {
+	public List<Map<String, String>> mergeList(List<Map<String, String>> leadsFromOrgA, List<Map<String, String>> leadsFromOrgB) {
 		List<Map<String, String>> mergedLeadsList = new ArrayList<Map<String, String>>();
 
 		// Put all leads from A in the merged mergedleadsList

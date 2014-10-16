@@ -24,7 +24,9 @@ import org.mule.processor.chain.SubflowInterceptingChainLifecycleWrapper;
 import org.mule.streaming.ConsumerIterator;
 import org.mule.tck.junit4.rule.DynamicPort;
 import org.mule.templates.builders.SfdcObjectBuilder;
+import org.mule.templates.transformers.SFDCLeadMerge;
 
+import com.google.common.collect.Lists;
 import com.sforce.soap.partner.SaveResult;
 
 /**
@@ -57,16 +59,11 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		flow.initialise();
 		flow.start();
 		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
-		CopyOnWriteArrayList<ConsumerIterator<Map<String, Object>>> list = ((CopyOnWriteArrayList<ConsumerIterator<Map<String, Object>>>)event.getMessage().getPayload());
-		Assert.assertTrue("The variable leadsFromOrgA or leadsFromOrgB is missing.", list.size() == 2);
-
-		ConsumerIterator<Map<String, Object>> leadsFromOrgA = list.get(0);
-		ConsumerIterator<Map<String, Object>> leadsFromOrgB = list.get(1);
-		
-		Assert.assertTrue("There should be leads in the variable leadsFromOrgA.", leadsFromOrgA.size() != 0);
-		Assert.assertTrue("There should be leads in the variable leadsFromOrgB.", leadsFromOrgB.size() != 0);
+		Iterator<Map<String, String>> list = (Iterator<Map<String, String>>)event.getMessage().getPayload();
+		Assert.assertTrue("There should be leads from source A or source B.", Lists.newArrayList(list).size() != 0);
 	}
 
+	/*
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void testAggregationFlow() throws Exception {
@@ -79,31 +76,37 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
 		Assert.assertFalse("The lead list should not be empty.", ((List) event.getMessage().getPayload()).isEmpty());
 	}
+	*/
 
 	@Test
-	public void testFormatOutputFlow() throws Exception {		
-		MuleEvent testEvent = prepareTestEvent();
-		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("aggregationFlow");
+	public void testFormatOutputFlow() throws Exception {
+		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("gatherDataFlow");
+		flow.setMuleContext(muleContext);
 		flow.initialise();
-		MuleEvent event = flow.process(testEvent);
+		flow.start();
+		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
 
 		flow = getSubFlow("formatOutputFlow");
+		flow.setMuleContext(muleContext);
 		flow.initialise();
+		flow.start();
 		event = flow.process(event);
 
 		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
 	}
 
 	@Test
-	public void testFormatOutputFlowWithEmptyEmail() throws Exception {
-		MuleEvent testEvent = prepareTestEvent();
-		
-		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("aggregationFlow");
+	public void testFormatOutputFlowWithEmptyEmail() throws Exception {		
+		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("gatherDataFlow");
+		flow.setMuleContext(muleContext);
 		flow.initialise();
-		MuleEvent event = flow.process(testEvent);
+		flow.start();
+		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
 		
 		flow = getSubFlow("formatOutputFlow");
+		flow.setMuleContext(muleContext);
 		flow.initialise();
+		flow.start();
 		event = flow.process(event);
 		
 		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
