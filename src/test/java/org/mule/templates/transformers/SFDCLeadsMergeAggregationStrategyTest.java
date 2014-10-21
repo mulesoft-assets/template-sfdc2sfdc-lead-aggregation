@@ -8,9 +8,9 @@ package org.mule.templates.transformers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import junit.framework.Assert;
 
@@ -22,8 +22,6 @@ import org.mule.api.MuleContext;
 import org.mule.api.MuleEvent;
 import org.mule.api.routing.AggregationContext;
 import org.mule.templates.integration.AbstractTemplateTestCase;
-
-import com.google.common.collect.Lists;
 
 @SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
@@ -51,8 +49,7 @@ public class SFDCLeadsMergeAggregationStrategyTest extends AbstractTemplateTestC
 		AggregationContext aggregationContext = new AggregationContext(null, testEvents);
 		
 		SFDCLeadMergeAggregationStrategy sfdcLeadMerge = new SFDCLeadMergeAggregationStrategy();
-		Iterator<Map<String, String>> iterator = (Iterator<Map<String, String>>) sfdcLeadMerge.aggregate(aggregationContext).getMessage().getPayload();
-		List<Map<String, String>> mergedList = Lists.newArrayList(iterator);
+		List<Map<String, String>> mergedList = (CopyOnWriteArrayList) sfdcLeadMerge.aggregate(aggregationContext).getMessage().getPayload();
 
 		System.out.println(mergedList);
 		Assert.assertEquals("The merged list obtained is not as expected", createExpectedList(), mergedList);

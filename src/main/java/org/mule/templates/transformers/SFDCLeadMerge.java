@@ -14,7 +14,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * This transformer will take to list as input and create a third one that will be the merge of the previous two. The identity of an element of the list is defined by its email.
+ * The object of this class will take two lists as input and create a third one that will be the merge of the previous two. The identity of an element of the list is defined by its email.
  */
 public class SFDCLeadMerge {
 

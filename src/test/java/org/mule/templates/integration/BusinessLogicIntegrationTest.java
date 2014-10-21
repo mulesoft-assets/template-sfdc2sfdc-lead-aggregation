@@ -8,7 +8,6 @@ package org.mule.templates.integration;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -21,12 +20,9 @@ import org.junit.Test;
 import org.mule.MessageExchangePattern;
 import org.mule.api.MuleEvent;
 import org.mule.processor.chain.SubflowInterceptingChainLifecycleWrapper;
-import org.mule.streaming.ConsumerIterator;
 import org.mule.tck.junit4.rule.DynamicPort;
 import org.mule.templates.builders.SfdcObjectBuilder;
-import org.mule.templates.transformers.SFDCLeadMerge;
 
-import com.google.common.collect.Lists;
 import com.sforce.soap.partner.SaveResult;
 
 /**
@@ -35,21 +31,21 @@ import com.sforce.soap.partner.SaveResult;
 public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 
 	protected static final String TEMPLATE_NAME = "lead-aggregation";
-	private List<Map<String, Object>> createdLeadsInA = new ArrayList<Map<String, Object>>();
-	private List<Map<String, Object>> createdLeadsInB = new ArrayList<Map<String, Object>>();
-	
+	private static List<Map<String, Object>> createdLeadsInA = new ArrayList<Map<String, Object>>();
+	private static List<Map<String, Object>> createdLeadsInB = new ArrayList<Map<String, Object>>();
+
 	@Rule
 	public DynamicPort port = new DynamicPort("http.port");
 
 	@Before
 	public void setUp() throws Exception {
-		createLeads();
+		createTestLeadsInSandBox();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		deleteTestLeadFromSandBox(createdLeadsInA, "deleteLeadFromAFlow");
-		deleteTestLeadFromSandBox(createdLeadsInB, "deleteLeadFromBFlow");
+		deleteTestLeadsFromSandBox(createdLeadsInA, "deleteLeadFromAFlow");
+		deleteTestLeadsFromSandBox(createdLeadsInB, "deleteLeadFromBFlow");
 	}
 
 	@Test
@@ -59,74 +55,19 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		flow.initialise();
 		flow.start();
 		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
-		Iterator<Map<String, String>> list = (Iterator<Map<String, String>>)event.getMessage().getPayload();
-		Assert.assertTrue("There should be leads from source A or source B.", Lists.newArrayList(list).size() != 0);
-	}
-
-	/*
-	@Test
-	@SuppressWarnings("rawtypes")
-	public void testAggregationFlow() throws Exception {
-		MuleEvent testEvent = prepareTestEvent();
-
-		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("aggregationFlow");
-		flow.initialise();
-		MuleEvent event = flow.process(testEvent);
-
-		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
-		Assert.assertFalse("The lead list should not be empty.", ((List) event.getMessage().getPayload()).isEmpty());
-	}
-	*/
-
-	@Test
-	public void testFormatOutputFlow() throws Exception {
-		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("gatherDataFlow");
-		flow.setMuleContext(muleContext);
-		flow.initialise();
-		flow.start();
-		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
-
-		flow = getSubFlow("formatOutputFlow");
-		flow.setMuleContext(muleContext);
-		flow.initialise();
-		flow.start();
-		event = flow.process(event);
-
-		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
+		List<Map<String, String>> mergedLeadList = (CopyOnWriteArrayList)event.getMessage().getPayload();
+		Assert.assertTrue("There should be leads from source A or source B.", mergedLeadList.size() != 0);
 	}
 
 	@Test
-	public void testFormatOutputFlowWithEmptyEmail() throws Exception {		
-		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("gatherDataFlow");
-		flow.setMuleContext(muleContext);
-		flow.initialise();
-		flow.start();
-		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
-		
-		flow = getSubFlow("formatOutputFlow");
-		flow.setMuleContext(muleContext);
-		flow.initialise();
-		flow.start();
-		event = flow.process(event);
-		
-		Assert.assertTrue("The payload should not be null.", event.getMessage().getPayload() != null);
-	}
+	public void testMainFlow() throws Exception {
+		MuleEvent event = runFlow("mainFlow");
 
-	private MuleEvent prepareTestEvent() throws Exception {
-		List<Map<String, Object>> leadsFromOrgA = createLeadLists("A", 0, 1, false);
-		List<Map<String, Object>> leadsFromOrgB = createLeadLists("B", 1, 2, false);
-		
-		MuleEvent testEvent = getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE);
-		CopyOnWriteArrayList<Iterator<Map<String, Object>>> list = new CopyOnWriteArrayList<Iterator<Map<String,Object>>>(); 
-		list.add(leadsFromOrgA.iterator());
-		list.add(leadsFromOrgB.iterator());
-		testEvent.getMessage().setPayload(list);
-
-		return testEvent;
+		Assert.assertTrue("The payload should not be null.", "Please find attached your Leads Report".equals(event.getMessage().getPayload()));
 	}
 
 	@SuppressWarnings("unchecked")
-	private void createLeads() throws Exception {
+	private void createTestLeadsInSandBox() throws Exception {
 		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("createLeadInAFlow");
 		flow.initialise();
 
@@ -153,15 +94,7 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		}
 	}
 
-	private List<Map<String, Object>> createLeadLists(String orgId, int start, int end, boolean createEmail) {
-		List<Map<String, Object>> leadList = new ArrayList<Map<String, Object>>();
-		for (int i = start; i <= end; i++) {
-			leadList.add(createLead(orgId, i, createEmail));
-		}
-		return leadList;
-	}
-
-	private void deleteTestLeadFromSandBox(List<Map<String, Object>> createdLeads, String deleteFlow) throws Exception {
+	private void deleteTestLeadsFromSandBox(List<Map<String, Object>> createdLeads, String deleteFlow) throws Exception {
 		List<String> idList = new ArrayList<String>();
 
 		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow(deleteFlow);
