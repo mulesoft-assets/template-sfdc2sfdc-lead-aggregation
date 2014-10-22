@@ -8,9 +8,9 @@ package org.mule.templates.integration;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -23,6 +23,7 @@ import org.mule.processor.chain.SubflowInterceptingChainLifecycleWrapper;
 import org.mule.tck.junit4.rule.DynamicPort;
 import org.mule.templates.builders.SfdcObjectBuilder;
 
+import com.google.common.collect.Lists;
 import com.sforce.soap.partner.SaveResult;
 
 /**
@@ -55,7 +56,7 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 		flow.initialise();
 		flow.start();
 		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
-		List<Map<String, String>> mergedLeadList = (CopyOnWriteArrayList)event.getMessage().getPayload();
+		List<Map<String, String>> mergedLeadList = Lists.newArrayList((Iterator<Map<String, String>>)event.getMessage().getPayload());
 		Assert.assertTrue("There should be leads from source A or source B.", mergedLeadList.size() != 0);
 	}
 

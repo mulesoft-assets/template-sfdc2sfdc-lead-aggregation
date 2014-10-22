@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import junit.framework.Assert;
 
@@ -35,7 +34,7 @@ public class SortLeadListTest {
 	@Test
 	public void testSort() throws TransformerException {
 		
-		MuleMessage message = new DefaultMuleMessage(new CopyOnWriteArrayList(createOriginalList()),
+		MuleMessage message = new DefaultMuleMessage(createOriginalList().iterator(),
 				muleContext);
 
 		SortLeadList transformer = new SortLeadList();

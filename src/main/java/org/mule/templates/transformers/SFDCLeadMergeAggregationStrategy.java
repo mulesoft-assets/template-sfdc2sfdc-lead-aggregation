@@ -9,7 +9,6 @@ package org.mule.templates.transformers;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.mule.DefaultMuleEvent;
 import org.mule.api.MuleEvent;
@@ -45,9 +44,9 @@ public class SFDCLeadMergeAggregationStrategy implements AggregationStrategy {
 		List<Map<String, String>> listB = getLeadsList(muleEventsWithoutException, 1);
 
 		SFDCLeadMerge sfdcLeadMerge = new SFDCLeadMerge();
-		CopyOnWriteArrayList<Iterator<Map<String, String>>> mergedLeadList = new CopyOnWriteArrayList(sfdcLeadMerge.mergeList(listA, listB));
+		List<Map<String, String>> mergedLeadList = (List<Map<String, String>>) sfdcLeadMerge.mergeList(listA, listB);
 
-		muleMessage.setPayload(mergedLeadList);
+		muleMessage.setPayload(mergedLeadList.iterator());
 
 		return new DefaultMuleEvent(muleMessage, muleEvent);
 	}
