@@ -30,23 +30,24 @@ public class SFDCLeadMergeAggregationStrategy implements AggregationStrategy {
 		List<MuleEvent> muleEventsWithoutException = context.collectEventsWithoutExceptions();
 		int muleEventsWithoutExceptionCount = muleEventsWithoutException.size();
 		
-		// there have to be exactly 2 sources (A and B)
+		// data should be loaded from both sources (A and B)
 		if (muleEventsWithoutExceptionCount != 2) {
-			throw new IllegalArgumentException("There have to be exactly 2 sources (A and B).");
+			throw new IllegalStateException("Data from at least one source was not able to be obtained correctly.");
 		}
 		
+		// mule event that will be rewritten
 		MuleEvent muleEvent = muleEventsWithoutException.get(0);
+		// message which payload will be rewritten
 		MuleMessage muleMessage = muleEvent.getMessage();
 		
+		// events are ordered so the event index corresponds to the index of each route
 		List<Map<String, String>> listA = getLeadsList(muleEventsWithoutException, 0);
 		List<Map<String, String>> listB = getLeadsList(muleEventsWithoutException, 1);
-		
-		// events are ordered so the event index corresponds to the index of each route
+
 		SFDCLeadMerge sfdcLeadMerge = new SFDCLeadMerge();
-		List<Map<String, String>> mergedLeadList = sfdcLeadMerge.mergeList(listA, listB);
-		
-//		muleMessage.setPayload(new CopyOnWriteArrayList<Map<String, String>>(mergedLeadList));
-		muleMessage.setPayload(mergedLeadList.iterator());
+		CopyOnWriteArrayList<Iterator<Map<String, String>>> mergedLeadList = new CopyOnWriteArrayList(sfdcLeadMerge.mergeList(listA, listB));
+
+		muleMessage.setPayload(mergedLeadList);
 
 		return new DefaultMuleEvent(muleMessage, muleEvent);
 	}
