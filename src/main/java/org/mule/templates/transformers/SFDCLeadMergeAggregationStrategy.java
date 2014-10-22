@@ -35,9 +35,9 @@ public class SFDCLeadMergeAggregationStrategy implements AggregationStrategy {
 		}
 		
 		// mule event that will be rewritten
-		MuleEvent muleEvent = muleEventsWithoutException.get(0);
+		MuleEvent originalEvent = context.getOriginalEvent();
 		// message which payload will be rewritten
-		MuleMessage muleMessage = muleEvent.getMessage();
+		MuleMessage message = originalEvent.getMessage();
 		
 		// events are ordered so the event index corresponds to the index of each route
 		List<Map<String, String>> listA = getLeadsList(muleEventsWithoutException, 0);
@@ -46,9 +46,9 @@ public class SFDCLeadMergeAggregationStrategy implements AggregationStrategy {
 		SFDCLeadMerge sfdcLeadMerge = new SFDCLeadMerge();
 		List<Map<String, String>> mergedLeadList = (List<Map<String, String>>) sfdcLeadMerge.mergeList(listA, listB);
 
-		muleMessage.setPayload(mergedLeadList.iterator());
+		message.setPayload(mergedLeadList.iterator());
 
-		return new DefaultMuleEvent(muleMessage, muleEvent);
+		return new DefaultMuleEvent(message, originalEvent);
 	}
 
 	private List<Map<String, String>> getLeadsList(List<MuleEvent> events, int index) {

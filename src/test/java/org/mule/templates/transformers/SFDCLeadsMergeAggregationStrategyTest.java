@@ -38,6 +38,7 @@ public class SFDCLeadsMergeAggregationStrategyTest extends AbstractTemplateTestC
 		List<Map<String, String>> leadsA = createLeadLists("A", 0, 1);
 		List<Map<String, String>> leadsB = createLeadLists("B", 1, 2);
 		
+		MuleEvent testOriginalEvent = getTestEvent("");
 		MuleEvent testEventA = getTestEvent("");
 		MuleEvent testEventB = getTestEvent("");
 		
@@ -48,7 +49,7 @@ public class SFDCLeadsMergeAggregationStrategyTest extends AbstractTemplateTestC
 		testEvents.add(testEventA);
 		testEvents.add(testEventB);
 		
-		AggregationContext aggregationContext = new AggregationContext(null, testEvents);
+		AggregationContext aggregationContext = new AggregationContext(testOriginalEvent, testEvents);
 		
 		SFDCLeadMergeAggregationStrategy sfdcLeadMerge = new SFDCLeadMergeAggregationStrategy();
 		List<Map<String, String>> mergedList = Lists.newArrayList((Iterator<Map<String, String>>) sfdcLeadMerge.aggregate(aggregationContext).getMessage().getPayload());
