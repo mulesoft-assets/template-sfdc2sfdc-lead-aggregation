@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import junit.framework.Assert;
 
@@ -19,25 +18,41 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mule.DefaultMuleMessage;
 import org.mule.api.MuleContext;
-import org.mule.api.MuleMessage;
-import org.mule.api.transformer.TransformerException;
+import org.mule.api.MuleEvent;
+import org.mule.api.routing.AggregationContext;
+import org.mule.templates.integration.AbstractTemplateTestCase;
+
+import com.google.common.collect.Lists;
 
 @SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
-public class SFDCLeadsMergeTest {
+public class SFDCLeadsMergeAggregationStrategyTest extends AbstractTemplateTestCase {
 	
 	@Mock
 	private MuleContext muleContext;
   
+	
 	@Test
-	public void testMerge() throws TransformerException {
+	public void testAggregate() throws Exception {
 		List<Map<String, String>> leadsA = createLeadLists("A", 0, 1);
 		List<Map<String, String>> leadsB = createLeadLists("B", 1, 2);
 		
-		SFDCLeadMerge sfdcLeadMerge = new SFDCLeadMerge();
-		List<Map<String, String>> mergedList = sfdcLeadMerge.mergeList(leadsA, leadsB);
+		MuleEvent testEventA = getTestEvent("");
+		MuleEvent testEventB = getTestEvent("");
+		
+		testEventA.getMessage().setPayload(leadsA.iterator());
+		testEventB.getMessage().setPayload(leadsB.iterator());
+		
+		List<MuleEvent> testEvents = new ArrayList<MuleEvent>();
+		testEvents.add(testEventA);
+		testEvents.add(testEventB);
+		
+		AggregationContext aggregationContext = new AggregationContext(null, testEvents);
+		
+		SFDCLeadMergeAggregationStrategy sfdcLeadMerge = new SFDCLeadMergeAggregationStrategy();
+		Iterator<Map<String, String>> iterator = (Iterator<Map<String, String>>) sfdcLeadMerge.aggregate(aggregationContext).getMessage().getPayload();
+		List<Map<String, String>> mergedList = Lists.newArrayList(iterator);
 
 		System.out.println(mergedList);
 		Assert.assertEquals("The merged list obtained is not as expected", createExpectedList(), mergedList);
