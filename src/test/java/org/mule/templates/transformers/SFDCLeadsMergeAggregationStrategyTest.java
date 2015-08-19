@@ -14,6 +14,8 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -25,9 +27,11 @@ import org.mule.templates.integration.AbstractTemplateTestCase;
 
 import com.google.common.collect.Lists;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "deprecation" })
 @RunWith(MockitoJUnitRunner.class)
 public class SFDCLeadsMergeAggregationStrategyTest extends AbstractTemplateTestCase {
+	
+	private final static Logger LOGGER = LogManager.getLogger(SFDCLeadsMergeAggregationStrategyTest.class);
 	
 	@Mock
 	private MuleContext muleContext;
@@ -54,7 +58,7 @@ public class SFDCLeadsMergeAggregationStrategyTest extends AbstractTemplateTestC
 		SFDCLeadMergeAggregationStrategy sfdcLeadMerge = new SFDCLeadMergeAggregationStrategy();
 		List<Map<String, String>> mergedList = Lists.newArrayList((Iterator<Map<String, String>>) sfdcLeadMerge.aggregate(aggregationContext).getMessage().getPayload());
 
-		System.out.println(mergedList);
+		LOGGER.info(mergedList);
 		Assert.assertEquals("The merged list obtained is not as expected", createExpectedList(), mergedList);
 
 	}

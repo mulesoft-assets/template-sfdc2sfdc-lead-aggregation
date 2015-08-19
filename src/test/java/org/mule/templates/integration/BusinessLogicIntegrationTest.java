@@ -50,13 +50,10 @@ public class BusinessLogicIntegrationTest extends AbstractTemplateTestCase {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testGatherDataFlow() throws Exception {
-		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("gatherDataFlow");
-		flow.setMuleContext(muleContext);
-		flow.initialise();
-		flow.start();
-		MuleEvent event = flow.process(getTestEvent("", MessageExchangePattern.REQUEST_RESPONSE));
-		List<Map<String, String>> mergedLeadList = Lists.newArrayList((Iterator<Map<String, String>>)event.getMessage().getPayload());
+		MuleEvent event = runFlow("gatherDataFlow");
+		List<Map<String, String>> mergedLeadList = Lists.newArrayList((Iterator<Map<String, String>>)event.getMessage().getPayload());		
 		Assert.assertTrue("There should be leads from source A or source B.", mergedLeadList.size() != 0);
 	}
 
