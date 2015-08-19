@@ -11,7 +11,7 @@ For practical purposes this Template will generate the result in the format of a
 
 This Template should serve as a foundation for extracting data from two systems, aggregating data, comparing values of fields for the objects, and generating a report on the differences. 
 
-As implemented, it gets leads from two instances of Salesforce, compares by the email address of the leads, and generates a CSV file which shows lead in A, lead in B, and leads in A and B. The report is then send as email to a configured group of email addresses.
+As implemented, it gets leads from two instances of Salesforce, compares by the email address of the leads, and generates a CSV file which shows lead in A, lead in B, and leads in A and B. The report is then emailed to a configured group of email addresses.
 		</section>
 		<section id="considerations">
 <![CDATA[
@@ -38,13 +38,13 @@ After this, to trigger the use case you just need to hit the local http endpoint
 + sfdc.a.username `bob.dylan@orga`
 + sfdc.a.password `DylanPassword123`
 + sfdc.a.securityToken `avsfwCUl7apQs56Xq2AKi3X`
-+ sfdc.a.url `https://login.salesforce.com/services/Soap/u/26.0`
++ sfdc.a.url `https://login.salesforce.com/services/Soap/u/32.0`
 
 #### SalesForce Connector configuration for company B
 + sfdc.b.username `joan.baez@orgb`
 + sfdc.b.password `JoanBaez456`
 + sfdc.b.securityToken `ces56arl7apQs56XTddf34X`
-+ sfdc.b.url `https://login.salesforce.com/services/Soap/u/26.0`
++ sfdc.b.url `https://login.salesforce.com/services/Soap/u/32.0`
 
 
 #### SMPT Services configuration
@@ -112,7 +112,7 @@ Criteria and format applied:
 All records ordered alphabetically by mail within each category.
 If you want to change this order then the *compare* method should be modified.
 
-+ CSV Report [DataMapper](http://www.mulesoft.org/documentation/display/current/Datamapper+User+Guide+and+Reference) transforming the List of Maps in CSV with headers **Name**, **Email**, **IDInA**, and **IDInB**.
++ CSV Report [DataWeave](https://developer.mulesoft.com/docs/dataweave) transforming the List of Maps in CSV with headers **Name**, **Email**, **IDInA**, and **IDInB**.
 + An [Object to string transformer](http://www.mulesoft.org/documentation/display/current/Transformers) is used to set the payload as an String. 
 
 ###  Outbound Flow

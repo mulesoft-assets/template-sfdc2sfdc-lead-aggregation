@@ -51,6 +51,7 @@ public class SFDCLeadMergeAggregationStrategy implements AggregationStrategy {
 		return new DefaultMuleEvent(message, originalEvent);
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<Map<String, String>> getLeadsList(List<MuleEvent> events, int index) {
 		Iterator<Map<String, String>> iterator = (Iterator<Map<String, String>>) events.get(index).getMessage().getPayload();
 		return Lists.newArrayList(iterator);
