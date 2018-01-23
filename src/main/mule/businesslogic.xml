@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+<flow name="businesslogicFlow" doc:id="20625294-79d3-45a3-90bd-9b44970bc67b" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="062ec4ac-b3c3-49f7-94b4-cea2462cf09b" >
+			<route >
+				<salesforce:query doc:name="query all leads from SalesForce instance A" doc:id="d97f8d00-2a6d-40e1-b2e4-34acdb69e47a" config-ref="Salesforce_Sfdc_A_config">
+					<salesforce:salesforce-query >SELECT Email,Id,Name FROM Lead</salesforce:salesforce-query>
+				</salesforce:query>
+			</route>
+			<route >
+				<salesforce:query doc:name="query all leads from SalesForce instance B" doc:id="559f5773-399c-4bce-9a81-40f9e611d9bd" config-ref="Salesforce_Sfdc_B_config">
+					<salesforce:salesforce-query >SELECT Email,Id,Name FROM Lead</salesforce:salesforce-query>
+				</salesforce:query>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Collection to CSV" doc:id="7668acb0-da18-4df8-92a8-0bc58c5ad88b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv separator=";"
+import mergeWith from dw::core::Objects
+var leadsA = payload["0"].payload map (lead) -> {
+	"Name": lead.Name,
+	"Email": lead.Email,
+	"IDInA": lead.Id
+}
+var leadsB = payload["1"].payload map (lead) -> {
+	"Name": lead.Name,
+	"Email": lead.Email,
+	"IDInB": lead.Id
+}
+var mergedLeads =  (
+                leadsA map ((item) -> item mergeWith ((leadsB filter ($.Email == item.Email))[0] 
+                    default {IDInB: ""}
+                ))
+            ) distinctBy $.Email
+            ++ (
+                leadsB map ((item) -> item mergeWith ((leadsA filter ($.Email == item.Email))[0] 
+                    default {IDInA: ""}
+                ))
+            ) distinctBy $.Email
+fun sortBySourceExistence (leads) = ((leads map (lead) -> (
+        lead ++ {
+            sortValue:  if ((lead.IDInA != "") and (lead.IDInB == "")) 1 
+                        else if ((lead.IDInB != "") and (lead.IDInA == "")) 2 
+                        else 3
+        }
+    )
+) orderBy $.sortValue ) map $ -"sortValue"
+---
+sortBySourceExistence(mergedLeads) map (lead) -> {
+	"Name": lead.Name,
+	"Email": lead.Email,
+	"IDInA": lead.IDInA,
+	"IDInB": lead.IDInB
+ }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<email:send config-ref="Gmail_SMTP" doc:name="Send migration result email"
+			doc:id="5896eaa9-dd10-47a2-a6fc-6319b11dbd06" fromAddress="${mail.from}"
+			subject="${mail.subject}">
+			<email:to-addresses>
+				<email:to-address value="${mail.to}" />
+			</email:to-addresses>
+			<email:body contentType="text/plain">
+				<email:content ><![CDATA[${mail.body}]]></email:content>
+			</email:body>
+			<email:attachments ><![CDATA[#[{'${attachment.name}' : payload}]]]></email:attachments>
+		
+</email:send>
+</flow>
+<flow name="mainFlow" doc:id="c9d80d54-ed92-4dc2-872f-629f3c0b678f" >
+	<flow-ref doc:name="Call businesslogicFlow" doc:id="7e1b3d52-2256-4af8-b0c5-b8fbee3d1b66" name="businesslogicFlow"/>
+	<error-handler >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="488b507d-e26c-4c56-8759-8bb4f6645d71" type="ANY">
+			<flow-ref doc:name="errorHandlingFlow" doc:id="afdaf73c-0137-4d60-84f6-5c41234771a3" name="errorHandlingFlow"/>
+		</on-error-propagate>
+	</error-handler>
+</flow>	
+	
+</mule>
