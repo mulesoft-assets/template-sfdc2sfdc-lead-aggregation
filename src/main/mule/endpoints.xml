@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<flow name="triggerFlow" doc:id="c56478bc-3563-4251-8c30-35d2da6a3e5b" >
 		<http:listener doc:name="Start Report Generation" doc:id="f56ef802-706b-494f-988f-531d0f06298c" config-ref="HTTP_Listener_config" path="/generatereport" allowedMethods="GET"/>
 		<flow-ref doc:name="Call mainFlow" doc:id="12238107-efe2-44fb-89f6-e1726655a746" name="mainFlow"/>
-		<logger level="INFO" doc:name="Message Response" doc:id="1fe8e50c-088b-4b7d-802c-1e99076947cf" message="Aggregation was finished"/>
+		<logger level="INFO" doc:name="Message Response" doc:id="1fe8e50c-088b-4b7d-802c-1e99076947cf" message="Aggregation has finished"/>
 	</flow>
 
 </mule>
