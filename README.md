@@ -170,15 +170,7 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 + attachment.name `OrderedReport.csv`
 
 # API Calls <a name="apicalls"/>
-Salesforce imposes limits on the number of API Calls that can be made. Therefore calculating this amount may be an important factor to consider. The template calls to the API can be calculated using the formula:
-
-***1 + X + X / 200***
-
-Being ***X*** the number of Leads to be synchronized on each run. 
-
-The division by ***200*** is because, by default, Leads are gathered in groups of 200 for each Upsert API Call in the commit step. Also consider that this calls are executed repeatedly every polling cycle.	
-
-For instance if 10 records are fetched from origin instance, then 12 api calls will be made (1 + 10 + 1).
+Salesforce imposes limits on the number of API Calls that can be made. However, we make API call to Salesforce only once during aggregation.
 
 
 # Customize It!<a name="customizeit"/>
