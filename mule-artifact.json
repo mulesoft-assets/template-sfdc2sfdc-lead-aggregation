@@ -1,13 +1,14 @@
 {
   "configs": [
+    "businessLogic.xml",
     "config.xml",
-    "errorhandling.xml",
-    "businesslogic.xml",
-    "endpoints.xml"
+    "endpoints.xml",
+    "errorHandling.xml"
   ],
+  "secureProperties": [],
   "redeploymentEnabled": true,
   "name": "template-sfdc2sfdc-lead-aggregation",
-  "minMuleVersion": "4.0.0",
+  "minMuleVersion": "4.1.0",
   "requiredProduct": "MULE_EE",
   "classLoaderModelLoaderDescriptor": {
     "id": "mule",
