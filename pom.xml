@@ -87,6 +87,6 @@
             <name>MuleSoft Releases Repository</name>
             <url>https://repository.mulesoft.org/releases/</url>
             <layout>default</layout>
-            </repository>
+        </repository>
     </repositories>
 </project>
