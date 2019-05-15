@@ -13,9 +13,7 @@
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<munit:config name="test-suite.xml" doc:name="MUnit configuration"/>
-	<configuration-properties doc:name="Configuration properties" doc:id="f84aca38-f1f7-4f51-8eec-da0c0397b4e6" file="mule.${mule.env}.properties" />
-	<configuration-properties doc:name="Configuration properties" doc:id="fafc6fb0-f98d-4c0d-beca-daaefea728a" file="mule-artifact.properties" />
-	<configuration-properties doc:name="Configuration properties" doc:id="557d3bab-0258-47bc-89e7-d2cbda4d740c" file="common.properties" />
+	<configuration-properties doc:name="Configuration properties" doc:id="e8474e00-5b82-4ae2-9e32-9bc4c5ab0bcc" file="mule.test.properties" />
 
 	<munit:before-test name="test-suiteBefore_Test" description="Before tests actions" doc:id="7c030541-a70a-4898-a2a2-8fa1b376c2c6" >
 		<ee:transform doc:name="Prepare testing data for instance A" doc:id="7c253cc1-4a09-4e71-a9c5-74e5dbbf5848">
@@ -37,7 +35,7 @@ output application/java
 ]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
-		<salesforce:create type="Lead" doc:name="Create Leads in instance A" doc:id="d62c8e61-71a7-43f3-8aa0-b4b5cb5359a4" config-ref="Salesforce_Sfdc_A_config"/>
+		<salesforce:create doc:name="Create Leads in instance A" doc:id="d62c8e61-71a7-43f3-8aa0-b4b5cb5359a4" config-ref="Salesforce_Sfdc_A_config" type="Lead"/>
 		<ee:transform doc:name="Store Ids from A and prepare testing data for instance B" doc:id="e2e1d72c-f29a-46e3-a6e8-eb359bc06da7">
 				<ee:message>
 					<ee:set-payload><![CDATA[%dw 2.0
@@ -61,7 +59,7 @@ output application/java
 payload map ($.id)]]></ee:set-variable>
 			</ee:variables>
 			</ee:transform>
-		<salesforce:create type="Lead" doc:name="Create Leads in instance B" doc:id="c07a554e-a6d1-4954-a3b6-f935962fc960" config-ref="Salesforce_Sfdc_B_config"/>
+		<salesforce:create doc:name="Create Leads in instance B" doc:id="c07a554e-a6d1-4954-a3b6-f935962fc960" config-ref="Salesforce_Sfdc_B_config" type="Lead"/>
 		<set-variable value="#[payload map ($.id)]" doc:name="Store Ids from B" doc:id="bb2161cb-3264-44cc-a50c-01227b38e50d" variableName="IdsB"/>
 		<munit-tools:mock-when doc:name="Mock email processor to avoid sending email" doc:id="28071162-6011-4d54-b119-69eb7a49052f" processor="email:send">
 				<munit-tools:then-return />
