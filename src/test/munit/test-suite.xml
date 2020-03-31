@@ -56,11 +56,11 @@ output application/java
 				<ee:set-variable variableName="IdsA" ><![CDATA[%dw 2.0
 output application/java
 ---
-payload map ($.id)]]></ee:set-variable>
+payload.items map ($.id)]]></ee:set-variable>
 			</ee:variables>
 			</ee:transform>
 		<salesforce:create doc:name="Create Leads in instance B" doc:id="c07a554e-a6d1-4954-a3b6-f935962fc960" config-ref="Salesforce_Sfdc_B_config" type="Lead"/>
-		<set-variable value="#[payload map ($.id)]" doc:name="Store Ids from B" doc:id="bb2161cb-3264-44cc-a50c-01227b38e50d" variableName="IdsB"/>
+		<set-variable value="#[payload.items map ($.id)]" doc:name="Store Ids from B" doc:id="bb2161cb-3264-44cc-a50c-01227b38e50d" variableName="IdsB"/>
 		<munit-tools:mock-when doc:name="Mock email processor to avoid sending email" doc:id="28071162-6011-4d54-b119-69eb7a49052f" processor="email:send">
 				<munit-tools:then-return />
 			</munit-tools:mock-when>
@@ -94,10 +94,10 @@ payload filter ($.Name == "TestRecord1" or $.Name == "TestRecord2" or $.Name == 
 
 	<munit:after-test name="test-suiteAfter_Test" description="After tests actions" doc:id="6a02575f-77d9-4a0e-b4e0-f381c83dd065" >
 		<salesforce:delete doc:name="Delete source Leads in instance A" doc:id="4ad887e6-475d-48f8-b50b-1434c0ba53fb" config-ref="Salesforce_Sfdc_A_config">
-				<salesforce:delete-ids><![CDATA[#[vars.IdsA]]]></salesforce:delete-ids>
+				<salesforce:ids><![CDATA[#[vars.IdsA]]]></salesforce:ids>
 			</salesforce:delete>
 		<salesforce:delete doc:name="Delete source Leads in instance B" doc:id="cee92ed8-322a-4e9e-9a81-ac0420c99273" config-ref="Salesforce_Sfdc_B_config">
-			<salesforce:delete-ids ><![CDATA[#[vars.IdsB]]]></salesforce:delete-ids>
+			<salesforce:ids ><![CDATA[#[vars.IdsB]]]></salesforce:ids>
 		</salesforce:delete>
 	</munit:after-test>
 </mule>
